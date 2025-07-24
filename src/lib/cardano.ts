@@ -8,6 +8,7 @@ export interface CardanoWallet {
 
 export interface WalletInfo {
   address: string;
+  name?: string;
   balance: number;
   network: 'mainnet' | 'testnet';
   stakeAddress?: string;
@@ -21,6 +22,13 @@ export const SUPPORTED_WALLETS = [
     icon: '🦎',
     color: 'from-blue-600 to-cyan-600'
   },
+  {
+    name: 'Lace',
+    key: 'lace',
+    icon: '🧵',
+    color: 'from-indigo-600 to-purple-600'
+  },
+
   {
     name: 'Eternl',
     key: 'eternl',
@@ -55,25 +63,38 @@ export const SUPPORTED_WALLETS = [
 
 // Check if wallet is installed
 export const isWalletInstalled = (walletKey: string): boolean => {
-  return typeof window !== 'undefined' && window.cardano && window.cardano[walletKey];
+  return !!(typeof window !== 'undefined' && window.cardano && window.cardano[walletKey]);
 };
 
 // Get available wallets
 export const getAvailableWallets = (): CardanoWallet[] => {
   if (typeof window === 'undefined') return [];
-  
+
   return SUPPORTED_WALLETS.map(wallet => ({
     name: wallet.name,
     icon: wallet.icon,
     api: window.cardano?.[wallet.key],
-    isEnabled: isWalletInstalled(wallet.key)
+    isEnabled: !!window.cardano?.[wallet.key] // ✅ Cast to boolean
   }));
 };
 
+export interface WalletApi {
+  enable: () => Promise<any>;
+  isEnabled: () => Promise<boolean>;
+  getUsedAddresses: () => Promise<string[]>;
+  getBalance: () => Promise<string>;
+  getNetworkId: () => Promise<number>;
+  getRewardAddresses: () => Promise<string[]>;
+  [key: string]: any;
+}
+
+
+
 // Connect to wallet
 export const connectWallet = async (walletKey: string): Promise<WalletInfo | null> => {
+
   try {
-    if (!isWalletInstalled(walletKey)) {
+    if (typeof window === 'undefined' || !window.cardano || !window.cardano[walletKey]) {
       throw new Error(`${walletKey} wallet is not installed`);
     }
 
@@ -122,16 +143,16 @@ export const shortenAddress = (address: string): string => {
 };
 
 // Declare global cardano object
-declare global {
-  interface Window {
-    cardano?: {
-      [key: string]: {
-        enable: () => Promise<any>;
-        isEnabled: () => Promise<boolean>;
-        apiVersion: string;
-        name: string;
-        icon: string;
-      };
-    };
-  }
-}
+// declare global {
+//   interface Window {
+//     cardano?: {
+//       [key: string]: {
+//         enable: () => Promise<any>;
+//         isEnabled: () => Promise<boolean>;
+//         apiVersion: string;
+//         name: string;
+//         icon: string;
+//       };
+//     };
+//   }
+// }

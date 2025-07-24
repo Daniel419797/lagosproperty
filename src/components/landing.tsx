@@ -23,7 +23,6 @@ import { useWallet } from '@meshsdk/react';
 // import WalletConnectButton from './WalletConnectButton';
 import WalletConnection from './WalletConnection';
 import { WalletInfo } from '../lib/cardano';
-import { useSyncedWallet } from '../hooks/useSyncedWallet';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -34,11 +33,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const { connected } = useWallet();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState<WalletInfo | null>(null);
-  const { address } = useSyncedWallet()
-
-  const truncatedAddress = address
-    ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : 'Not Connected';
 
   const features = [
     {
@@ -132,7 +126,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 aria-label={connected ? "View Wallet Info" : "Connect Wallet"}
               >
                 <Wallet className="h-4 w-4" />
-                <span>{connected ? truncatedAddress : "Connect Wallet"}</span>
+                <span>{connected ? "Wallet Connected" : "Connect Wallet"}</span>
               </button>
 
               <button
@@ -236,7 +230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <>
                   <button 
                     onClick={() => setIsWalletModalOpen(true)}
-                    className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 flex items-center justify-center space-x-2 ${
+                    className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-xl border transition-all duration-200 ${
                       connected
                         ? 'border-gray-300 text-green-700 hover:border-gray-400 hover:bg-gray-50'
                         : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
