@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Building2, CreditCard, Zap, User, BarChart3, Settings, Bell, MapPin, Shield, CheckCircle, AlertTriangle, TrendingUp, Users, FileText, Wallet } from 'lucide-react';
 import PaymentModal from './components/PaymentModal';
+import Market from './components/Market';
 import PaymentHistory from './components/PaymentHistory';
 import LandingPage from './components/LandingPage';
+// import PropertyListingForm from './components/propertyListingForm';
 
 type UserType = 'citizen' | 'property-owner' | 'government';
 type ViewType = 'landing' | 'dashboard' | 'marketplace' | 'tax-payment' | 'utilities' | 'properties' | 'compliance' | 'analytics';
@@ -44,7 +46,9 @@ interface UtilityService {
 function App() {
   const [userType, setUserType] = useState<UserType>('citizen');
   const [currentView, setCurrentView] = useState<ViewType>('landing');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
   const [paymentModal, setPaymentModal] = useState<{
     isOpen: boolean;
     type: 'tax' | 'utility' | 'property';
@@ -169,6 +173,15 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const handleGetStarted = () => {
     setCurrentView('dashboard');
     setIsAuthenticated(true);
@@ -176,9 +189,12 @@ function App() {
 
   const handleSignIn = (selectedUserType: UserType) => {
     setUserType(selectedUserType);
+    localStorage.setItem('isAuthenticated', 'true');
     setIsAuthenticated(true);
     setCurrentView('dashboard');
   };
+
+  // {!isAuthenticated ? () : ()  }
 
   const LoginScreen = () => (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
@@ -480,42 +496,10 @@ function App() {
   );
 
   const Marketplace = () => (
+    
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Property Marketplace</h1>
-          <p className="text-gray-600 mt-1">Verified properties with blockchain e-numbers</p>
-        </div>
-        <button className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors duration-200">
-          List Property
-        </button>
-      </div>
-
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <select className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            <option>All Types</option>
-            <option>For Rent</option>
-            <option>For Sale</option>
-          </select>
-          <select className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            <option>All Locations</option>
-            <option>Victoria Island</option>
-            <option>Lekki</option>
-            <option>Surulere</option>
-          </select>
-          <select className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            <option>Price Range</option>
-            <option>Under ₦1M</option>
-            <option>₦1M - ₦5M</option>
-            <option>Above ₦5M</option>
-          </select>
-          <button className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors duration-200">
-            Search
-          </button>
-        </div>
-      </div>
-
+    
+      <Market/>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sampleProperties.map(property => (
           <PropertyCard key={property.id} property={property} />
